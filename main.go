@@ -58,17 +58,17 @@ func main() {
 			var matchups = []Matchup{}
 
 			error := app.Dao().DB().NewQuery(`
-				SELECT 
-					(matches.id || player_results.player || opponent_results.player) as id,
-				    matches.match_number as match_number,
-					player_results.player as player,
-					opponent_results.player as opponent,
-					(player_results.place < opponent_results.place)-(player_results.place > opponent_results.place) as win
-				FROM matches
-					LEFT JOIN results player_results on matches.id = player_results.match
-					LEFT JOIN results opponent_results on player_results.match = opponent_results.match
-					and player_results.player != opponent_results.player
-				`).All(&matchups)
+        SELECT 
+            (matches.id || player_results.player || opponent_results.player) as id,
+            matches.match_number as match_number,
+            player_results.player as player,
+            opponent_results.player as opponent,
+            (player_results.place < opponent_results.place)-(player_results.place > opponent_results.place) as win
+        FROM matches
+            LEFT JOIN results player_results on matches.id = player_results.match
+            LEFT JOIN results opponent_results on player_results.match = opponent_results.match
+            and player_results.player != opponent_results.player
+        `).All(&matchups)
 
 			if error != nil {
 				return c.JSON(http.StatusOK, map[string]string{"message": "Error " + error.Error()})
@@ -93,27 +93,13 @@ func main() {
 				}
 			}
 
-			players := []Player{}
+			players := make([]Player, 0, len(matchups))
 
 			for _, match := range matches {
 				log.Println("Match Number: ", match.MatchNumber)
 				for _, matchup := range match.Matchups {
-					player := findPlayerOrNil(players, matchup.Player)
-					if player == nil {
-						players = append(players, Player{
-							Id:   matchup.Player,
-							Rank: initial,
-						})
-						player = findPlayerOrNil(players, matchup.Player)
-					}
-					opponent := findPlayerOrNil(players, matchup.Opponent)
-					if opponent == nil {
-						players = append(players, Player{
-							Id:   matchup.Opponent,
-							Rank: initial,
-						})
-						opponent = findPlayerOrNil(players, matchup.Opponent)
-					}
+					var player, opponent *Player
+					players, player, opponent = retrievePlayers(players, matchup)
 					expected_score := 1 / (1 + math.Pow(10, float64(opponent.Rank-player.Rank)/400))
 					actual_score := 0.5 + 0.5*float64(matchup.Win)
 					rankChange := int(k * (actual_score - expected_score))
@@ -143,6 +129,26 @@ func main() {
 	if err := app.Start(); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func retrievePlayers(players []Player, matchup Matchup) ([]Player, *Player, *Player) {
+	player := findPlayerOrNil(players, matchup.Player)
+	if player == nil {
+		players = append(players, Player{
+			Id:   matchup.Player,
+			Rank: initial,
+		})
+		player = findPlayerOrNil(players, matchup.Player)
+	}
+	opponent := findPlayerOrNil(players, matchup.Opponent)
+	if opponent == nil {
+		players = append(players, Player{
+			Id:   matchup.Opponent,
+			Rank: initial,
+		})
+		opponent = findPlayerOrNil(players, matchup.Opponent)
+	}
+	return players, player, opponent
 }
 
 func sumRankChange(players []Player) int {
