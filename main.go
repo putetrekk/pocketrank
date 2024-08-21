@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"math"
 	//	"os"
 
 	"github.com/labstack/echo/v5"
@@ -14,7 +15,7 @@ import (
 )
 
 const (
-	delta   = 25
+	k       = 25
 	initial = 1000
 )
 
@@ -103,12 +104,23 @@ func main() {
 							Id:   matchup.Player,
 							Rank: initial,
 						})
-						player = &players[len(players)-1]
+						player = findPlayerOrNil(players, matchup.Player)
 					}
-					player.RankChange += matchup.Win * delta
+					opponent := findPlayerOrNil(players, matchup.Opponent)
+					if opponent == nil {
+						players = append(players, Player{
+							Id:   matchup.Opponent,
+							Rank: initial,
+						})
+						opponent = findPlayerOrNil(players, matchup.Opponent)
+					}
+					expected_score := 1 / (1 + math.Pow(10, float64(opponent.Rank-player.Rank)/400))
+					actual_score := 0.5 + 0.5*float64(matchup.Win)
+					rankChange := int(k * (actual_score - expected_score))
+					player.RankChange += rankChange
 				}
-				log.Println("Sum rank change: ", sumRankChange(players))
-				if match.MatchNumber == 2 {
+				log.Println("Sum rank change. This should be zero: ", sumRankChange(players))
+				if match.MatchNumber == 1 {
 					for _, player := range players {
 						log.Println("Player: ", player.Id)
 						log.Println("Rank: ", player.Rank)
