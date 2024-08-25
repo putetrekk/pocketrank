@@ -52,8 +52,7 @@ func main() {
 	})
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
-		e.Router.GET("/api/pocketrank/get_rank/:name", func(c echo.Context) error {
-			//name := c.PathParam("name")
+		e.Router.GET("/api/pocketrank/ratings", func(c echo.Context) error {
 
 			var matchups = []Matchup{}
 

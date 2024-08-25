@@ -90,7 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _fetchRankings() async {
     try {
-      final url = Uri.http('127.0.0.1:8090', 'api/pocketrank/get_rank/john');
+      final url = Uri.http('127.0.0.1:8090', 'api/pocketrank/ratings');
       final response = await http.get(
         url,
         headers: {'Authorization': pb.authStore.token},
