@@ -121,7 +121,7 @@ func main() {
 
 			return c.JSON(http.StatusOK, players)
 
-		})
+		} /*, apis.RequireAdminOrRecordAuth("results", "read")*/)
 
 		return nil
 	})

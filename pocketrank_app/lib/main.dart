@@ -1,10 +1,15 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:pocketbase/pocketbase.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
+final pb = PocketBase('http://127.0.0.1:8090');
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -60,8 +65,9 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
-  ResultList<RecordModel> _data = ResultList<RecordModel>();
-  final pb = PocketBase('http://127.0.0.1:8090');
+  var _data = ResultList<RecordModel>();
+  var _rankings = [];
+  
 
   void _incrementCounter() {
     setState(() {
@@ -83,10 +89,27 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  void _fetchRankings() async {
+    try {
+      final url = Uri.http('127.0.0.1:8090', 'api/pocketrank/get_rank/john');
+      final response = await http.get(
+        url,
+        headers: {'Authorization': pb.authStore.token},
+      );
+      final List<dynamic> rankingsList = jsonDecode(utf8.decode(response.bodyBytes)) as List<dynamic>;
+      setState(() {
+        _rankings = rankingsList;
+      });
+    } catch (e) {
+      print('Failed to fetch rankings: $e');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _fetchData();
+    _fetchRankings();
   }
 
   @override
@@ -112,6 +135,19 @@ class _MyHomePageState extends State<MyHomePage> {
                 itemBuilder: (context, index) {
                   return ListTile(
                     title: Text(_data.items[index].toString()),
+                  );
+                },
+              ),
+            ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: _rankings.length,
+                itemBuilder: (context, index) {
+                  final ranking = _rankings[index] as Map<String, dynamic>;
+                  final key = ranking.keys.first;
+                  return ListTile(
+                    title: Text('$key: ${ranking[key]}'),
+                    subtitle: Text('Rank: ${ranking['rank']}'),
                   );
                 },
               ),
