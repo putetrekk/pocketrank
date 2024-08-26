@@ -42,6 +42,69 @@ class MyApp extends StatelessWidget {
   }
 }
 
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+  
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  void _login() async {
+    await pb.collection('users').authWithPassword(
+      _usernameController.text,
+      _passwordController.text,
+    );
+    print(pb.authStore.token);
+    print(pb.authStore.model);
+  }
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Login'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextField(
+              controller: _usernameController,
+              decoration: const InputDecoration(
+                labelText: 'Username',
+              ),
+            ),
+            TextField(
+              controller: _passwordController,
+              decoration: const InputDecoration(
+                labelText: 'Password',
+              ),
+              obscureText: true,
+            ),
+            ElevatedButton(
+              onPressed: () {
+                _login();
+              },
+              child: const Text('Login'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
@@ -56,23 +119,14 @@ class MyHomePage extends StatefulWidget {
 
   final String title;
 
-  
-
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  var _userName = "Not logged in";
   var _data = ResultList<RecordModel>();
   var _rankings = [];
-  
-
-  void _incrementCounter() {
-    setState(() {
-      _counter += 3;
-    });
-  }
 
   void _fetchData() async {
     try {
@@ -109,6 +163,11 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     _fetchData();
     _fetchRankings();
+    pb.authStore.onChange.listen((e) async{
+      setState(() {
+        _userName = (pb.authStore.model as RecordModel).data["name"];
+      });
+    });
   }
 
   @override
@@ -122,10 +181,10 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text(
-              'You have pushed the button this many times:',
+              "You're logged in as:",
             ),
             Text(
-              '$_counter',
+              _userName,
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             Expanded(
@@ -151,13 +210,17 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
               ),
             ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginPage()),
+                );
+              },
+              child: const Text('Go to Login Page'),
+            ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
       ),
     );
   }
