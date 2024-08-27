@@ -1,18 +1,21 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:pocketbase/pocketbase.dart';
+import 'package:logger/logger.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
 final pb = PocketBase('http://127.0.0.1:8090');
+final logger = Logger();
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-  
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -44,7 +47,7 @@ class MyApp extends StatelessWidget {
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
-  
+
   @override
   State<LoginPage> createState() => _LoginPageState();
 }
@@ -55,9 +58,9 @@ class _LoginPageState extends State<LoginPage> {
 
   void _login() async {
     await pb.collection('users').authWithPassword(
-      _usernameController.text,
-      _passwordController.text,
-    );
+          _usernameController.text,
+          _passwordController.text,
+        );
   }
 
   @override
@@ -121,9 +124,23 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
+class Ranking {
+  Ranking({required this.name, required this.rank});
+
+  final String name;
+  final int rank;
+
+  factory Ranking.fromJson(Map<String, dynamic> json) {
+    return Ranking(
+      name: json['name'] as String,
+      rank: json['rank'] as int,
+    );
+  }
+}
+
 class _MyHomePageState extends State<MyHomePage> {
   var _userName = "Not logged in";
-  var _rankings = [];
+  var _rankings = <Ranking>[];
 
   void _fetchRankings() async {
     try {
@@ -132,20 +149,21 @@ class _MyHomePageState extends State<MyHomePage> {
         url,
         headers: {'Authorization': pb.authStore.token},
       );
-      print(utf8.decode(response.bodyBytes));
-      final List<dynamic> rankingsList = jsonDecode(utf8.decode(response.bodyBytes)) as List<dynamic>;
+      final rankingsList = (jsonDecode(utf8.decode(response.bodyBytes)) as List)
+          .map((e) => Ranking.fromJson(e))
+          .toList();
       setState(() {
         _rankings = rankingsList;
       });
     } catch (e) {
-      print('Failed to fetch rankings: $e');
+      logger.e('Failed to fetch rankings: $e');
     }
   }
 
   @override
   void initState() {
     super.initState();
-    pb.authStore.onChange.listen((e) async{
+    pb.authStore.onChange.listen((e) async {
       setState(() {
         _userName = (pb.authStore.model as RecordModel).data["name"];
       });
@@ -174,10 +192,10 @@ class _MyHomePageState extends State<MyHomePage> {
               child: ListView.builder(
                 itemCount: _rankings.length,
                 itemBuilder: (context, index) {
-                  final ranking = _rankings[index] as Map<String, dynamic>;
+                  final ranking = _rankings[index];
                   return ListTile(
-                    title: Text('Player: ${ranking['name']}'),
-                    subtitle: Text('Rating: ${ranking['rank']}'),
+                    title: Text('Player: ${ranking.name}'),
+                    subtitle: Text('Rating: ${ranking.rank}'),
                   );
                 },
               ),
