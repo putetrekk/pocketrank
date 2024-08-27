@@ -58,8 +58,6 @@ class _LoginPageState extends State<LoginPage> {
       _usernameController.text,
       _passwordController.text,
     );
-    print(pb.authStore.token);
-    print(pb.authStore.model);
   }
 
   @override
@@ -125,22 +123,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   var _userName = "Not logged in";
-  var _data = ResultList<RecordModel>();
   var _rankings = [];
-
-  void _fetchData() async {
-    try {
-      final data = await pb.collection('results').getList(
-        page: 1,
-        perPage: 20,
-      );
-      setState(() {
-        _data = data;
-      });
-    } catch (e) {
-      print('Failed to fetch data: $e');
-    }
-  }
 
   void _fetchRankings() async {
     try {
@@ -149,6 +132,7 @@ class _MyHomePageState extends State<MyHomePage> {
         url,
         headers: {'Authorization': pb.authStore.token},
       );
+      print(utf8.decode(response.bodyBytes));
       final List<dynamic> rankingsList = jsonDecode(utf8.decode(response.bodyBytes)) as List<dynamic>;
       setState(() {
         _rankings = rankingsList;
@@ -161,12 +145,11 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    _fetchData();
-    _fetchRankings();
     pb.authStore.onChange.listen((e) async{
       setState(() {
         _userName = (pb.authStore.model as RecordModel).data["name"];
       });
+      _fetchRankings();
     });
   }
 
@@ -189,23 +172,12 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Expanded(
               child: ListView.builder(
-                itemCount: _data.totalItems,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(_data.items[index].toString()),
-                  );
-                },
-              ),
-            ),
-            Expanded(
-              child: ListView.builder(
                 itemCount: _rankings.length,
                 itemBuilder: (context, index) {
                   final ranking = _rankings[index] as Map<String, dynamic>;
-                  final key = ranking.keys.first;
                   return ListTile(
-                    title: Text('$key: ${ranking[key]}'),
-                    subtitle: Text('Rank: ${ranking['rank']}'),
+                    title: Text('Player: ${ranking['name']}'),
+                    subtitle: Text('Rating: ${ranking['rank']}'),
                   );
                 },
               ),

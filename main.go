@@ -5,12 +5,11 @@ import (
 	"net/http"
 
 	"math"
-	//	"os"
 
 	"github.com/labstack/echo/v5"
 	"github.com/pocketbase/pocketbase"
 
-	//    "github.com/pocketbase/pocketbase/apis"
+	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
 )
 
@@ -20,11 +19,12 @@ const (
 )
 
 type Matchup struct {
-	Id          string `db:"id" json:"id"`
-	MatchNumber int    `db:"match_number" json:"match_number"`
-	Player      string `db:"player" json:"player"`
-	Opponent    string `db:"opponent" json:"opponent"`
-	Win         int    `db:"win" json:"win"`
+	MatchNumber  int    `db:"match_number" json:"match_number"`
+	Player       string `db:"player" json:"player"`
+	PlayerName   string `db:"player_name" json:"player_name"`
+	Opponent     string `db:"opponent" json:"opponent"`
+	OpponentName string `db:"opponent_name" json:"opponent_name"`
+	Win          int    `db:"win" json:"win"`
 }
 
 type Match struct {
@@ -34,6 +34,7 @@ type Match struct {
 
 type Player struct {
 	Id         string `json:"id"`
+	Name       string `json:"name"`
 	Rank       int    `json:"rank"`
 	RankChange int    `json:"rank_change"`
 }
@@ -58,15 +59,19 @@ func main() {
 
 			error := app.Dao().DB().NewQuery(`
         SELECT 
-            (matches.id || player_results.player || opponent_results.player) as id,
             matches.match_number as match_number,
             player_results.player as player,
+			player_user.name as player_name,
             opponent_results.player as opponent,
+			opponent_user.name as opponent_name,
             (player_results.place < opponent_results.place)-(player_results.place > opponent_results.place) as win
         FROM matches
             LEFT JOIN results player_results on matches.id = player_results.match
             LEFT JOIN results opponent_results on player_results.match = opponent_results.match
             and player_results.player != opponent_results.player
+			LEFT JOIN users player_user on player_results.player = player_user.id
+			LEFT JOIN users opponent_user on opponent_results.player = opponent_user.id
+
         `).All(&matchups)
 
 			if error != nil {
@@ -104,24 +109,13 @@ func main() {
 					rankChange := int(k * (actual_score - expected_score))
 					player.RankChange += rankChange
 				}
-				log.Println("Sum rank change. This should be zero: ", sumRankChange(players))
-				if match.MatchNumber == 1 {
-					for _, player := range players {
-						log.Println("Player: ", player.Id)
-						log.Println("Rank: ", player.Rank)
-						log.Println("Rank Change: ", player.RankChange)
-					}
-				}
 				for i := range players {
 					players[i].Rank += players[i].RankChange
 					players[i].RankChange = 0
 				}
 			}
-
 			return c.JSON(http.StatusOK, players)
-
-		} /*, apis.RequireAdminOrRecordAuth("results", "read")*/)
-
+		}, apis.RequireAdminOrRecordAuth())
 		return nil
 	})
 
@@ -135,6 +129,7 @@ func retrievePlayers(players []Player, matchup Matchup) ([]Player, *Player, *Pla
 	if player == nil {
 		players = append(players, Player{
 			Id:   matchup.Player,
+			Name: matchup.PlayerName,
 			Rank: initial,
 		})
 		player = findPlayerOrNil(players, matchup.Player)
@@ -143,6 +138,7 @@ func retrievePlayers(players []Player, matchup Matchup) ([]Player, *Player, *Pla
 	if opponent == nil {
 		players = append(players, Player{
 			Id:   matchup.Opponent,
+			Name: matchup.OpponentName,
 			Rank: initial,
 		})
 		opponent = findPlayerOrNil(players, matchup.Opponent)
