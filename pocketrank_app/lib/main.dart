@@ -1,7 +1,8 @@
 import 'dart:convert';
-import 'dart:typed_data';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:pocketbase/pocketbase.dart';
 import 'package:logger/logger.dart';
@@ -129,12 +130,25 @@ class Ranking {
 
   final String name;
   final int rank;
+  String leadingEmoji = '\u{1F3C5}';
 
   factory Ranking.fromJson(Map<String, dynamic> json) {
     return Ranking(
       name: json['name'] as String,
       rank: json['rank'] as int,
     );
+  }
+
+  setleadingIcon(int leaderboardPosition) {
+    if (leaderboardPosition == 0) {
+      leadingEmoji = '\u{1F947}';
+    } else if (leaderboardPosition == 1) {
+      leadingEmoji = '\u{1F948}';
+    } else if (leaderboardPosition == 2) {
+      leadingEmoji = '\u{1F949}';
+    } else {
+      leadingEmoji = '\u{1F3C5}';
+    }
   }
 }
 
@@ -152,6 +166,10 @@ class _MyHomePageState extends State<MyHomePage> {
       final rankingsList = (jsonDecode(utf8.decode(response.bodyBytes)) as List)
           .map((e) => Ranking.fromJson(e))
           .toList();
+      rankingsList.sort((a, b) => b.rank.compareTo(a.rank));
+      for (int i = 0; i < rankingsList.length; i++) {
+        rankingsList[i].setleadingIcon(i);
+      }
       setState(() {
         _rankings = rankingsList;
       });
@@ -192,10 +210,11 @@ class _MyHomePageState extends State<MyHomePage> {
               child: ListView.builder(
                 itemCount: _rankings.length,
                 itemBuilder: (context, index) {
-                  final ranking = _rankings[index];
                   return ListTile(
-                    title: Text('Player: ${ranking.name}'),
-                    subtitle: Text('Rating: ${ranking.rank}'),
+                    leading: Text(_rankings[index].leadingEmoji,
+                        style: const TextStyle(fontSize: 20)),
+                    title: Text(_rankings[index].name),
+                    subtitle: Text('Rank: ${_rankings[index].rank}'),
                   );
                 },
               ),
