@@ -58,10 +58,34 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordController = TextEditingController();
 
   void _login() async {
-    await pb.collection('users').authWithPassword(
-          _usernameController.text,
-          _passwordController.text,
+    try {
+      await pb.collection('users').authWithPassword(
+            _usernameController.text,
+            _passwordController.text,
+          );
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      _passwordController.clear();
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Login Failed'),
+            content: const Text('Invalid username or password.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          ),
         );
+      }
+    }
   }
 
   @override
