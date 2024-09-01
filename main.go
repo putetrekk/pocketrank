@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"sort"
 
 	"math"
 
@@ -114,6 +115,11 @@ func main() {
 					players[i].RankChange = 0
 				}
 			}
+
+			sort.Slice(players, func(i, j int) bool {
+				return players[i].Rank > players[j].Rank
+			})
+
 			return c.JSON(http.StatusOK, players)
 		}, apis.RequireAdminOrRecordAuth())
 		return nil

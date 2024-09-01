@@ -139,15 +139,20 @@ class Ranking {
     );
   }
 
-  setleadingIcon(int leaderboardPosition) {
-    if (leaderboardPosition == 0) {
-      leadingEmoji = '\u{1F947}';
-    } else if (leaderboardPosition == 1) {
-      leadingEmoji = '\u{1F948}';
-    } else if (leaderboardPosition == 2) {
-      leadingEmoji = '\u{1F949}';
-    } else {
-      leadingEmoji = '\u{1F3C5}';
+  void setLeadingEmoji(int leaderboardPosition) {
+    switch (leaderboardPosition) {
+      case 0:
+        leadingEmoji = '\u{1F947}';
+        break;
+      case 1:
+        leadingEmoji = '\u{1F948}';
+        break;
+      case 2:
+        leadingEmoji = '\u{1F949}';
+        break;
+      default:
+        leadingEmoji = '\u{1F3C5}';
+        break;
     }
   }
 }
@@ -166,9 +171,8 @@ class _MyHomePageState extends State<MyHomePage> {
       final rankingsList = (jsonDecode(utf8.decode(response.bodyBytes)) as List)
           .map((e) => Ranking.fromJson(e))
           .toList();
-      rankingsList.sort((a, b) => b.rank.compareTo(a.rank));
-      for (int i = 0; i < rankingsList.length; i++) {
-        rankingsList[i].setleadingIcon(i);
+      for (var ranking in rankingsList) {
+        ranking.setLeadingEmoji(rankingsList.indexOf(ranking));
       }
       setState(() {
         _rankings = rankingsList;
