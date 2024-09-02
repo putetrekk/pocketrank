@@ -1,8 +1,6 @@
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:pocketbase/pocketbase.dart';
 import 'package:logger/logger.dart';
@@ -251,10 +249,136 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: () {
                 Navigator.push(
                   context,
+                  MaterialPageRoute(builder: (context) => const AddMatchPage()),
+                );
+              },
+              child: const Text('Add Match'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
                   MaterialPageRoute(builder: (context) => const LoginPage()),
                 );
               },
               child: const Text('Go to Login Page'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class AddMatchPage extends StatefulWidget {
+  const AddMatchPage({Key? key}) : super(key: key);
+
+  @override
+  _AddMatchPageState createState() => _AddMatchPageState();
+}
+
+class _AddMatchPageState extends State<AddMatchPage> {
+  var _resultController = ResultList<RecordModel>();
+  var _availablePlayers = ResultList<RecordModel>();
+  var _selectedPlayer = TextEditingController();
+  var _placementController = TextEditingController();
+
+  void _loadAvailablePlayers() async {
+    try {
+      final availablePlayers = await pb.collection('available_players').getList();
+      setState(() {
+        _availablePlayers = availablePlayers;
+      });
+    } catch (e) {
+      print('Failed to load available players: $e');
+    }
+  }
+
+  void _addMatch() async {
+    try {
+      final match = await pb.collection('matches').create();
+      for (var result in _resultController.items) {
+        await pb.collection('results').create(body: {
+          'match': match.id, // Assuming match.id is the correct way to reference the match
+          'player': result.id,
+          'score': result.data['score'],
+        });
+      }
+    } catch (e) {
+      print('Failed to add match: $e');
+    }
+  }
+
+  void addPlayer() {
+    final player = _availablePlayers.items.firstWhere((element) => element.id == _selectedPlayer.text);
+    _resultController.items.add(player);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAvailablePlayers();
+  }
+
+  @override
+  void dispose() {
+    _selectedPlayer.dispose();
+    _placementController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Add Match'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Column(
+              children: _resultController.items
+                  .map((e) => Row(
+                        children: [
+                          Text(e.data['name']),
+                          Expanded(
+                            child: TextField(
+                              controller: TextEditingController(),
+                              decoration: const InputDecoration(
+                                labelText: 'Score',
+                              ),
+                            ),
+                          ),
+                        ],
+                      ))
+                  .toList(),
+            ),
+            DropdownButton<String>(
+              items: _availablePlayers.items.map(
+                (e) {
+                  return DropdownMenuItem<String>(
+                    value: e.id,
+                    child: Text(e.data['name']),
+                  );
+                },
+              ).toList(),
+              value: _selectedPlayer.text.isEmpty ? null : _selectedPlayer.text,
+              onChanged: (value) {
+                setState(() {
+                  _selectedPlayer.text = value!;
+                });
+              },
+              hint: const Text('Select a player'),
+            ),
+            ElevatedButton(
+              onPressed: addPlayer,
+              child: const Text('Add Player'),
+            ),
+            ElevatedButton(
+              onPressed: _addMatch,
+              child: const Text('Add Match'),
             ),
           ],
         ),
