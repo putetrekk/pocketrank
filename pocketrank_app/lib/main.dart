@@ -271,7 +271,7 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class AddMatchPage extends StatefulWidget {
-  const AddMatchPage({Key? key}) : super(key: key);
+  const AddMatchPage({super.key});
 
   @override
   _AddMatchPageState createState() => _AddMatchPageState();
