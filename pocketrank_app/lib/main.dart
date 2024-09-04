@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'PocketRank',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'PocketRank'),
     );
   }
 }
@@ -277,15 +277,25 @@ class AddMatchPage extends StatefulWidget {
   _AddMatchPageState createState() => _AddMatchPageState();
 }
 
+class Result {
+  final String player;
+  final String match;
+  final int place;
+
+  Result({required this.player, required this.match, required this.place});
+}
+
 class _AddMatchPageState extends State<AddMatchPage> {
-  var _resultController = ResultList<RecordModel>();
+  final _results = [
+    Result(player: 'someplayerid', match: 'somematchid', place: 1),
+  ];
   var _availablePlayers = ResultList<RecordModel>();
   var _selectedPlayer = TextEditingController();
-  var _placementController = TextEditingController();
 
   void _loadAvailablePlayers() async {
     try {
-      final availablePlayers = await pb.collection('available_players').getList();
+      final availablePlayers =
+          await pb.collection('available_players').getList();
       setState(() {
         _availablePlayers = availablePlayers;
       });
@@ -297,11 +307,11 @@ class _AddMatchPageState extends State<AddMatchPage> {
   void _addMatch() async {
     try {
       final match = await pb.collection('matches').create();
-      for (var result in _resultController.items) {
+      for (var result in _results) {
         await pb.collection('results').create(body: {
-          'match': match.id, // Assuming match.id is the correct way to reference the match
-          'player': result.id,
-          'score': result.data['score'],
+          'match': match.id,
+          'player': result.player,
+          'place': result.place,
         });
       }
     } catch (e) {
@@ -310,8 +320,16 @@ class _AddMatchPageState extends State<AddMatchPage> {
   }
 
   void addPlayer() {
-    final player = _availablePlayers.items.firstWhere((element) => element.id == _selectedPlayer.text);
-    _resultController.items.add(player);
+    final player = _availablePlayers.items
+        .firstWhere((element) => element.id == _selectedPlayer.text);
+    final result = Result(
+      player: player.id,
+      match: 'somematchid',
+      place: 1,
+    );
+    setState(() {
+      _results.add(result);
+    });
   }
 
   @override
@@ -323,7 +341,6 @@ class _AddMatchPageState extends State<AddMatchPage> {
   @override
   void dispose() {
     _selectedPlayer.dispose();
-    _placementController.dispose();
     super.dispose();
   }
 
@@ -339,17 +356,29 @@ class _AddMatchPageState extends State<AddMatchPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Column(
-              children: _resultController.items
+              children: _results
                   .map((e) => Row(
                         children: [
-                          Text(e.data['name']),
-                          Expanded(
-                            child: TextField(
-                              controller: TextEditingController(),
-                              decoration: const InputDecoration(
-                                labelText: 'Score',
-                              ),
-                            ),
+                          Text(e.player),
+                          DropdownButton<int>(
+                            items: List.generate(_results.length, (index) {
+                              return DropdownMenuItem<int>(
+                                value: index + 1,
+                                child: Text((index + 1).toString()),
+                              );
+                            }),
+                            value: e.place,
+                            onChanged: (value) {
+                              setState(() {
+                                _results.remove(e);
+                                _results.add(Result(
+                                  player: e.player,
+                                  match: e.match,
+                                  place: value!,
+                                ));
+                              });
+                            },
+                            hint: const Text('Select a score'),
                           ),
                         ],
                       ))
@@ -378,7 +407,11 @@ class _AddMatchPageState extends State<AddMatchPage> {
             ),
             ElevatedButton(
               onPressed: _addMatch,
-              child: const Text('Add Match'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor:
+                    Colors.blue, // Set the primary color of the button
+              ),
+              child: const Text('Save Match'),
             ),
           ],
         ),
