@@ -1,4 +1,4 @@
-module myapp
+module pocketrank
 
 go 1.23.0
 
