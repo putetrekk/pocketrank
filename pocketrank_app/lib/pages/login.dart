@@ -79,6 +79,9 @@ class _LoginPageState extends State<LoginPage> {
                 labelText: 'Password',
               ),
               obscureText: true,
+              onSubmitted: (_) {
+                _login();
+              },
             ),
             ElevatedButton(
               onPressed: () {

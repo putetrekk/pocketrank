@@ -28,7 +28,7 @@ class _AddMatchPageState extends State<AddMatchPage> {
     ),
   ];
   var _availablePlayers = ResultList<RecordModel>();
-  var _selectedPlayer = TextEditingController();
+  final _selectedPlayer = TextEditingController();
 
   _AddMatchPageState({required this.pb});
 
