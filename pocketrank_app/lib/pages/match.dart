@@ -11,23 +11,27 @@ class AddMatchPage extends StatefulWidget {
 }
 
 class Result {
-  final String player;
+  final String playerId;
+  final String playerName;
   final String match;
   final int place;
 
-  Result({required this.player, required this.match, required this.place});
+  Result(
+      {required this.playerId,
+      required this.playerName,
+      required this.match,
+      required this.place});
 }
 
 class _AddMatchPageState extends State<AddMatchPage> {
   final PocketBase pb;
   final _results = <Result>[];
   var _availablePlayers = ResultList<RecordModel>();
-  ResultList<RecordModel> _remainingAvailablePlayers() {
-    final remainingPlayers = _availablePlayers.items
-        .where(
-            (element) => !_results.any((result) => result.player == element.id))
+  List<RecordModel> _remainingAvailablePlayers() {
+    return _availablePlayers.items
+        .where((element) =>
+            !_results.any((result) => result.playerId == element.id))
         .toList();
-    return ResultList<RecordModel>(items: remainingPlayers);
   }
 
   var _addingPlayer = false;
@@ -52,7 +56,7 @@ class _AddMatchPageState extends State<AddMatchPage> {
       for (var result in _results) {
         await pb.collection('results').create(body: {
           'match': match.id,
-          'player': result.player,
+          'player': result.playerId,
           'place': result.place,
         });
       }
@@ -65,9 +69,10 @@ class _AddMatchPageState extends State<AddMatchPage> {
     final selectedPlayer =
         _availablePlayers.items.firstWhere((element) => element.id == playerId);
     final result = Result(
-      player: selectedPlayer.id,
+      playerId: selectedPlayer.id,
       match: 'somematchid',
       place: 1,
+      playerName: selectedPlayer.data['name'],
     );
     setState(() {
       _results.add(result);
@@ -95,7 +100,7 @@ class _AddMatchPageState extends State<AddMatchPage> {
               children: _results
                   .map((e) => Row(
                         children: [
-                          Text(e.player),
+                          Text(e.playerName),
                           DropdownButton<int>(
                             items: List.generate(_results.length, (index) {
                               return DropdownMenuItem<int>(
@@ -108,9 +113,10 @@ class _AddMatchPageState extends State<AddMatchPage> {
                               setState(() {
                                 _results.remove(e);
                                 _results.add(Result(
-                                  player: e.player,
+                                  playerId: e.playerId,
                                   match: e.match,
                                   place: value!,
+                                  playerName: e.playerName,
                                 ));
                               });
                             },
@@ -131,7 +137,7 @@ class _AddMatchPageState extends State<AddMatchPage> {
               )
             else
               DropdownButton<String>(
-                items: _remainingAvailablePlayers().items.map(
+                items: _remainingAvailablePlayers().map(
                   (e) {
                     return DropdownMenuItem<String>(
                       value: e.id,
