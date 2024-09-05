@@ -104,8 +104,14 @@ class _MyHomePageState extends State<MyHomePage> {
                   MaterialPageRoute(builder: (context) => AddMatchPage(pb: pb)),
                 );
               },
+              style: _userName != "Not logged in"
+                  ? ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white)
+                  : ElevatedButton.styleFrom(),
               child: const Text('Add Match'),
             ),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -113,8 +119,14 @@ class _MyHomePageState extends State<MyHomePage> {
                   MaterialPageRoute(builder: (context) => LoginPage(pb: pb)),
                 );
               },
+              style: _userName == "Not logged in"
+                  ? ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white)
+                  : ElevatedButton.styleFrom(),
               child: const Text('Go to Login Page'),
             ),
+            const SizedBox(height: 20),
           ],
         ),
       ),

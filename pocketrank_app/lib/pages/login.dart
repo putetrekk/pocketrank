@@ -64,32 +64,40 @@ class _LoginPageState extends State<LoginPage> {
         title: const Text('Login'),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              controller: _usernameController,
-              decoration: const InputDecoration(
-                labelText: 'Username',
+        child: Container(
+          width: MediaQuery.of(context).size.width *
+              0.8, // Set width to 80% of the screen width
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TextField(
+                controller: _usernameController,
+                decoration: const InputDecoration(
+                  labelText: 'Username',
+                ),
               ),
-            ),
-            TextField(
-              controller: _passwordController,
-              decoration: const InputDecoration(
-                labelText: 'Password',
+              TextField(
+                controller: _passwordController,
+                decoration: const InputDecoration(
+                  labelText: 'Password',
+                ),
+                obscureText: true,
+                onSubmitted: (_) {
+                  _login();
+                },
               ),
-              obscureText: true,
-              onSubmitted: (_) {
-                _login();
-              },
-            ),
-            ElevatedButton(
-              onPressed: () {
-                _login();
-              },
-              child: const Text('Login'),
-            ),
-          ],
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  _login();
+                },
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white),
+                child: const Text('Login'),
+              ),
+            ],
+          ),
         ),
       ),
     );

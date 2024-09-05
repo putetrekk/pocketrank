@@ -99,8 +99,7 @@ class _AddMatchPageState extends State<AddMatchPage> {
             Column(
               children: _results
                   .map((e) => Row(
-                        mainAxisAlignment: MainAxisAlignment
-                            .center,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Expanded(
                             child: Text(e.playerName),
@@ -116,12 +115,14 @@ class _AddMatchPageState extends State<AddMatchPage> {
                             onChanged: (value) {
                               setState(() {
                                 _results.remove(e);
-                                _results.add(Result(
-                                  playerId: e.playerId,
-                                  match: e.match,
-                                  place: value!,
-                                  playerName: e.playerName,
-                                ));
+                                _results.insert(
+                                    value! - 1,
+                                    Result(
+                                      playerId: e.playerId,
+                                      match: e.match,
+                                      place: value,
+                                      playerName: e.playerName,
+                                    ));
                               });
                             },
                             hint: const Text('Select a score'),
@@ -130,6 +131,7 @@ class _AddMatchPageState extends State<AddMatchPage> {
                       ))
                   .toList(),
             ),
+            const SizedBox(height: 20),
             if (!_addingPlayer)
               ElevatedButton(
                 onPressed: () {
@@ -159,9 +161,13 @@ class _AddMatchPageState extends State<AddMatchPage> {
                 },
                 hint: const Text('Select a player'),
               ),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _addMatch,
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+              ),
               child: const Text('Save Match'),
             ),
           ],
