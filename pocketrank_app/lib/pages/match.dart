@@ -29,7 +29,6 @@ class _AddMatchPageState extends State<AddMatchPage> {
   ];
   var _availablePlayers = ResultList<RecordModel>();
   var _addingPlayer = false;
-  final _selectedPlayer = TextEditingController();
 
   _AddMatchPageState({required this.pb});
 
@@ -60,11 +59,11 @@ class _AddMatchPageState extends State<AddMatchPage> {
     }
   }
 
-  void addPlayer() {
-    final player = _availablePlayers.items
-        .firstWhere((element) => element.id == _selectedPlayer.text);
+  void addPlayer(String playerId) {
+    final selectedPlayer = _availablePlayers.items
+        .firstWhere((element) => element.id == playerId);
     final result = Result(
-      player: player.id,
+      player: selectedPlayer.id,
       match: 'somematchid',
       place: 1,
     );
@@ -77,12 +76,6 @@ class _AddMatchPageState extends State<AddMatchPage> {
   void initState() {
     super.initState();
     _loadAvailablePlayers();
-  }
-
-  @override
-  void dispose() {
-    _selectedPlayer.dispose();
-    super.dispose();
   }
 
   @override
@@ -144,13 +137,10 @@ class _AddMatchPageState extends State<AddMatchPage> {
                     );
                   },
                 ).toList(),
-                value:
-                    _selectedPlayer.text.isEmpty ? null : _selectedPlayer.text,
                 onChanged: (value) {
                   setState(() {
-                    _selectedPlayer.text = value!;
-                    if (value.isNotEmpty) {
-                      addPlayer();
+                    if (value != null && value.isNotEmpty) {
+                      addPlayer(value);
                       _addingPlayer = false;
                     }
                   });
