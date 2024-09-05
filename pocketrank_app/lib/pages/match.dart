@@ -99,8 +99,12 @@ class _AddMatchPageState extends State<AddMatchPage> {
             Column(
               children: _results
                   .map((e) => Row(
+                        mainAxisAlignment: MainAxisAlignment
+                            .center,
                         children: [
-                          Text(e.playerName),
+                          Expanded(
+                            child: Text(e.playerName),
+                          ),
                           DropdownButton<int>(
                             items: List.generate(_results.length, (index) {
                               return DropdownMenuItem<int>(
@@ -157,10 +161,7 @@ class _AddMatchPageState extends State<AddMatchPage> {
               ),
             ElevatedButton(
               onPressed: _addMatch,
-              style: ElevatedButton.styleFrom(
-                backgroundColor:
-                    Colors.blue, // Set the primary color of the button
-              ),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
               child: const Text('Save Match'),
             ),
           ],
