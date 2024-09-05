@@ -28,6 +28,7 @@ class _AddMatchPageState extends State<AddMatchPage> {
     ),
   ];
   var _availablePlayers = ResultList<RecordModel>();
+  var _addingPlayer = false;
   final _selectedPlayer = TextEditingController();
 
   _AddMatchPageState({required this.pb});
@@ -124,27 +125,38 @@ class _AddMatchPageState extends State<AddMatchPage> {
                       ))
                   .toList(),
             ),
-            DropdownButton<String>(
-              items: _availablePlayers.items.map(
-                (e) {
-                  return DropdownMenuItem<String>(
-                    value: e.id,
-                    child: Text(e.data['name']),
-                  );
+            if (!_addingPlayer)
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _addingPlayer = true;
+                  });
                 },
-              ).toList(),
-              value: _selectedPlayer.text.isEmpty ? null : _selectedPlayer.text,
-              onChanged: (value) {
-                setState(() {
-                  _selectedPlayer.text = value!;
-                });
-              },
-              hint: const Text('Select a player'),
-            ),
-            ElevatedButton(
-              onPressed: addPlayer,
-              child: const Text('Add Player'),
-            ),
+                child: const Text('Add Player'),
+              )
+            else
+              DropdownButton<String>(
+                items: _availablePlayers.items.map(
+                  (e) {
+                    return DropdownMenuItem<String>(
+                      value: e.id,
+                      child: Text(e.data['name']),
+                    );
+                  },
+                ).toList(),
+                value:
+                    _selectedPlayer.text.isEmpty ? null : _selectedPlayer.text,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedPlayer.text = value!;
+                    if (value.isNotEmpty) {
+                      addPlayer();
+                      _addingPlayer = false;
+                    }
+                  });
+                },
+                hint: const Text('Select a player'),
+              ),
             ElevatedButton(
               onPressed: _addMatch,
               style: ElevatedButton.styleFrom(
