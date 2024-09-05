@@ -20,13 +20,7 @@ class Result {
 
 class _AddMatchPageState extends State<AddMatchPage> {
   final PocketBase pb;
-  final _results = [
-    Result(
-      player: 'someplayerid',
-      match: 'somematchid',
-      place: 1,
-    ),
-  ];
+  final _results = <Result>[];
   var _availablePlayers = ResultList<RecordModel>();
   ResultList<RecordModel> _remainingAvailablePlayers() {
     final remainingPlayers = _availablePlayers.items
