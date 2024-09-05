@@ -25,7 +25,7 @@ const (
 )
 
 type Matchup struct {
-	MatchNumber  int    `db:"match_number" json:"match_number"`
+	MatchAt      int    `db:"match_at" json:"match_at"`
 	Player       string `db:"player" json:"player"`
 	PlayerName   string `db:"player_name" json:"player_name"`
 	Opponent     string `db:"opponent" json:"opponent"`
@@ -34,7 +34,7 @@ type Matchup struct {
 }
 
 type Match struct {
-	MatchNumber int       `json:"match_number"`
+	MatchNumber int       `json:"match_at"`
 	Matchups    []Matchup `json:"matchups"`
 }
 
@@ -72,7 +72,7 @@ func main() {
 
 			error := app.Dao().DB().NewQuery(`
         SELECT 
-            matches.match_number as match_number,
+            unixepoch(matches.match_at) as match_at,
             player_results.player as player,
 			player_user.name as player_name,
             opponent_results.player as opponent,
@@ -96,7 +96,7 @@ func main() {
 			for _, matchup := range matchups {
 				found := false
 				for i, group := range matches {
-					if group.MatchNumber == matchup.MatchNumber {
+					if group.MatchNumber == matchup.MatchAt {
 						matches[i].Matchups = append(group.Matchups, matchup)
 						found = true
 						break
@@ -104,7 +104,7 @@ func main() {
 				}
 				if !found {
 					matches = append(matches, Match{
-						MatchNumber: matchup.MatchNumber,
+						MatchNumber: matchup.MatchAt,
 						Matchups:    []Matchup{matchup},
 					})
 				}
