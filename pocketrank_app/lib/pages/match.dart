@@ -28,6 +28,14 @@ class _AddMatchPageState extends State<AddMatchPage> {
     ),
   ];
   var _availablePlayers = ResultList<RecordModel>();
+  ResultList<RecordModel> _remainingAvailablePlayers() {
+    final remainingPlayers = _availablePlayers.items
+        .where(
+            (element) => !_results.any((result) => result.player == element.id))
+        .toList();
+    return ResultList<RecordModel>(items: remainingPlayers);
+  }
+
   var _addingPlayer = false;
 
   _AddMatchPageState({required this.pb});
@@ -60,8 +68,8 @@ class _AddMatchPageState extends State<AddMatchPage> {
   }
 
   void addPlayer(String playerId) {
-    final selectedPlayer = _availablePlayers.items
-        .firstWhere((element) => element.id == playerId);
+    final selectedPlayer =
+        _availablePlayers.items.firstWhere((element) => element.id == playerId);
     final result = Result(
       player: selectedPlayer.id,
       match: 'somematchid',
@@ -129,7 +137,7 @@ class _AddMatchPageState extends State<AddMatchPage> {
               )
             else
               DropdownButton<String>(
-                items: _availablePlayers.items.map(
+                items: _remainingAvailablePlayers().items.map(
                   (e) {
                     return DropdownMenuItem<String>(
                       value: e.id,
