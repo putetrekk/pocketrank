@@ -36,6 +36,9 @@ class _MyHomePageState extends State<MyHomePage> {
   _MyHomePageState({required this.pb});
 
   void _fetchRankings() async {
+    if (_userName == "Not logged in") {
+      return;
+    }
     try {
       final url = Uri.http('127.0.0.1:8090', 'api/pocketrank/ratings');
       final response = await http.get(
@@ -65,6 +68,10 @@ class _MyHomePageState extends State<MyHomePage> {
       });
       _fetchRankings();
     });
+  }
+
+  void _onMatchAdded() {
+    _fetchRankings();
   }
 
   @override
@@ -101,7 +108,7 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => AddMatchPage(pb: pb)),
+                  MaterialPageRoute(builder: (context) => AddMatchPage(pb: pb, onMatchAdded: _onMatchAdded)),
                 );
               },
               style: _userName != "Not logged in"

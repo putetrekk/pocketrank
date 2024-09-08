@@ -3,8 +3,9 @@ import 'package:pocketbase/pocketbase.dart';
 
 class AddMatchPage extends StatefulWidget {
   final PocketBase pb;
+  final VoidCallback onMatchAdded;
 
-  const AddMatchPage({super.key, required this.pb});
+  const AddMatchPage({super.key, required this.pb, required this.onMatchAdded});
 
   @override
   _AddMatchPageState createState() => _AddMatchPageState(pb: pb);
@@ -52,7 +53,9 @@ class _AddMatchPageState extends State<AddMatchPage> {
 
   void _addMatch() async {
     try {
-      final match = await pb.collection('matches').create();
+      final match = await pb.collection('matches').create(body: {
+        'match_at': DateTime.now().toIso8601String(),
+      });
       for (var result in _results) {
         await pb.collection('results').create(body: {
           'match': match.id,
@@ -60,6 +63,8 @@ class _AddMatchPageState extends State<AddMatchPage> {
           'place': result.place,
         });
       }
+      widget.onMatchAdded();
+      Navigator.pop(context);
     } catch (e) {
       print('Failed to add match: $e');
     }
