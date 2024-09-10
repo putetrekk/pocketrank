@@ -40,7 +40,7 @@ jobs:
         script: |
           curl -L https://raw.githubusercontent.com/putetrekk/pocketrank/main/pocketrank.service. --output /etc/systemd/system/pocketrank.service
           echo "Downloading artifact at https://api.github.com/repos/putetrekk/pocketrank/actions/artifacts/${{steps.artifact-upload.outputs.artifact-id}}/zip"
-          curl -L -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/putetrekk/pocketrank/actions/artifacts/${{steps.artifact-upload.outputs.artifact-id}}/zip --output artifact.zip
+          curl -L -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github.v3+json" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/putetrekk/pocketrank/actions/artifacts/${{steps.artifact-upload.outputs.artifact-id}}/zip --output artifact.zip
           echo "Unzipping artifact"
           unzip -o artifact.zip -d /root/pocketrank
           echo "Restarting service"
