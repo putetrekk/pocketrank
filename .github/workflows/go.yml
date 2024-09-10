@@ -25,7 +25,20 @@ jobs:
       run: go build -v -o ./bin/pocketrank
 
     - name: Archive production artifacts
+      id: artifact-upload
       uses: actions/upload-artifact@v4
       with:
         name: pocketrank-backend
         path: ./bin
+
+    - name: Deploy to VPS
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.PASSWORD }}
+        script: |
+          curl -L https://raw.githubusercontent.com/putetrekk/pocketrank/main/pocketrank.service --output /etc/systemd/system/pocketrank.service
+          curl -L https://api.github.com/repos/putetrekk/pocketrank/actions/artifacts/${{steps.artifact-upload.outputs.artifact_id}}/zip --output artifact.zip
+          unzip -o artifact.zip -d /root/pocketrank
+          systemctl restart pocketrank.service
