@@ -44,5 +44,6 @@ jobs:
           echo "Unzipping artifact"
           unzip -o artifact.zip -d /root/pocketrank
           echo "Restarting service"
+          systemctl daemon-reload
           systemctl restart pocketrank.service
           echo "Step completed"
