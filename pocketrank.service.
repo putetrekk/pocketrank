@@ -10,7 +10,7 @@ Restart        = always
 RestartSec     = 5s
 StandardOutput = append:/root/pocketrank/errors.log
 StandardError  = append:/root/pocketrank/errors.log
-ExecStart      = /root/pocketrank/pocketrank serve
+ExecStart      = /root/pocketrank/pocketrank serve --http="0.0.0.0:8090"
 
 [Install]
 WantedBy = multi-user.target
