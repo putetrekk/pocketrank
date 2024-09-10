@@ -39,6 +39,6 @@ jobs:
         password: ${{ secrets.PASSWORD }}
         script: |
           curl -L https://raw.githubusercontent.com/putetrekk/pocketrank/main/pocketrank.service --output /etc/systemd/system/pocketrank.service
-          curl -L https://api.github.com/repos/putetrekk/pocketrank/actions/artifacts/${{steps.artifact-upload.outputs.artifact_id}}/zip --output artifact.zip
+          curl -L -header "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/putetrekk/pocketrank/actions/artifacts/${{steps.artifact-upload.outputs.artifact_id}}/zip --output artifact.zip
           unzip -o artifact.zip -d /root/pocketrank
           systemctl restart pocketrank.service
