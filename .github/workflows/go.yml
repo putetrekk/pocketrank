@@ -24,5 +24,8 @@ jobs:
     - name: Build
       run: go build -v ./...
 
-#     - name: Test
-#       run: go test -v ./...
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: pocketrank-backend
+        path: ./pocketrank
