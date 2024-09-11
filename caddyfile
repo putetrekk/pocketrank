@@ -4,7 +4,6 @@ pocketrank.api.sjolander.no {
     }
     reverse_proxy 127.0.0.1:8090 {
         transport http {
-            tls_insecure_skip_verify
         }
     }
 }
