@@ -46,8 +46,12 @@ jobs:
           unzip -o artifact.zip -d /root/pocketrank
           echo "Restarting service"
           chmod +x /root/pocketrank/pocketrank
+          echo "Reloading daemon"
           systemctl daemon-reload
+          echo "Restarting nftables"
           systemctl restart nftables
+          echo "Restarting pocketrank"
           systemctl restart pocketrank.service
+          echo "Restarting caddy"
           systemctl reload caddy
-          echo "Step completed"
+          echo "Deploy complete... hopefully"
