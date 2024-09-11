@@ -24,12 +24,30 @@ jobs:
     - name: Build
       run: go build -v -o ./bin/pocketrank
 
-    - name: Archive production artifacts
+    - name: Archive server production artifact
       id: artifact-upload
       uses: actions/upload-artifact@v4
       with:
         name: pocketrank-backend
         path: ./bin
+
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable'
+        flutter-version: '3.5.1'
+
+    - name: Build Flutter web client
+      run: |
+        cd pocketrank_app
+        flutter build web
+
+    - name: Archive client production artifact
+      id: artifact-upload-client
+      uses: actions/upload-artifact@v4
+      with:
+        name: pocketrank-frontend
+        path: ./pocketrank_app/build/web
 
     - name: Deploy to VPS
       uses: appleboy/ssh-action@master
@@ -38,12 +56,18 @@ jobs:
         username: ${{ secrets.USERNAME }}
         password: ${{ secrets.PASSWORD }}
         script: |
+          echo "Downloading service file"
           curl --silent --show-error -L https://raw.githubusercontent.com/putetrekk/pocketrank/main/pocketrank.service --output /etc/systemd/system/pocketrank.service
+          echo "Downloading caddyfile"
           curl --silent --show-error -L https://raw.githubusercontent.com/putetrekk/pocketrank/main/caddyfile --output /etc/caddy/Caddyfile
           echo "Downloading artifact at https://api.github.com/repos/putetrekk/pocketrank/actions/artifacts/${{steps.artifact-upload.outputs.artifact-id}}/zip"
           curl --silent --show-error -L -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github.v3+json" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/putetrekk/pocketrank/actions/artifacts/${{steps.artifact-upload.outputs.artifact-id}}/zip --output artifact.zip
           echo "Unzipping artifact"
           unzip -o artifact.zip -d /root/pocketrank
+          echo "Downloading client artifact at https://api.github.com/repos/putetrekk/pocketrank/actions/artifacts/${{steps.artifact-upload-client.outputs.artifact-id}}/zip"
+          curl --silent --show-error -L -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github.v3+json" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/putetrekk/pocketrank/actions/artifacts/${{steps.artifact-upload-client.outputs.artifact-id}}/zip --output client.zip
+          echo "Unzipping client artifact"
+          unzip -o client.zip -d /var/www/pocketrank
           echo "Restarting service"
           chmod +x /root/pocketrank/pocketrank
           echo "Reloading daemon"
