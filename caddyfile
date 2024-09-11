@@ -1,0 +1,17 @@
+pocketrank.api.sjolander.no {
+    request_body {
+        max_size 10MB
+    }
+    reverse_proxy 127.0.0.1:8090 {
+        transport http {
+            tls_insecure_skip_verify
+        }
+    }
+}
+
+pocketrank.sjolander.no {
+    request_body {
+        max_size 10MB
+    }
+    root * /var/www/pocketrank
+}
