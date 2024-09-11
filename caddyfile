@@ -4,6 +4,7 @@ pocketrank.api.sjolander.no {
     }
     reverse_proxy 127.0.0.1:8090 {
         transport http {
+            read_timeout 360s
         }
     }
 }
