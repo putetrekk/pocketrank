@@ -7,7 +7,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  final pb = PocketBase('http://127.0.0.1:8090');
+  final pb = PocketBase('https://pocketrank.api.sjolander.no');
 
   MyApp({super.key});
 

@@ -40,7 +40,7 @@ class _MyHomePageState extends State<MyHomePage> {
       return;
     }
     try {
-      final url = Uri.http('127.0.0.1:8090', 'api/pocketrank/ratings');
+      final url = Uri.https('pocketrank.api.sjolander.no', 'api/pocketrank/ratings');
       final response = await http.get(
         url,
         headers: {'Authorization': pb.authStore.token},
