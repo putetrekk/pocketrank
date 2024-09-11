@@ -40,7 +40,7 @@ jobs:
     - name: Build Flutter web client
       run: |
         cd pocketrank_app
-        flutter build web
+        flutter build web --release
 
     - name: Archive client production artifact
       id: artifact-upload-client
