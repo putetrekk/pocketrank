@@ -76,6 +76,7 @@ class _LoginPageState extends State<LoginPage> {
                 decoration: const InputDecoration(
                   labelText: 'Username',
                 ),
+                autofillHints: const [AutofillHints.username],
               ),
               TextField(
                 controller: _passwordController,
@@ -83,6 +84,7 @@ class _LoginPageState extends State<LoginPage> {
                   labelText: 'Password',
                 ),
                 obscureText: true,
+                autofillHints: const [AutofillHints.password],
                 onSubmitted: (_) {
                   _login();
                 },
