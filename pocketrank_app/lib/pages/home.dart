@@ -5,10 +5,10 @@ import 'package:logger/logger.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import 'login.dart';
 import 'match.dart';
-import 'reset_password.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title, required this.pb});
@@ -20,11 +20,27 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState(pb: pb);
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   final PocketBase pb;
   var _userName = "Not logged in";
   var _rankings = <Ranking>[];
   final logger = Logger();
+  late final AnimationController _controller;
+  
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    )..repeat();
+    pb.authStore.onChange.listen((e) async {
+      setState(() {
+        _userName = (pb.authStore.model as RecordModel).data["name"];
+      });
+      _fetchRankings();
+    });
+  }
 
   _MyHomePageState({required this.pb});
 
@@ -53,17 +69,6 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    pb.authStore.onChange.listen((e) async {
-      setState(() {
-        _userName = (pb.authStore.model as RecordModel).data["name"];
-      });
-      _fetchRankings();
-    });
-  }
-
   void _onMatchAdded() {
     _fetchRankings();
   }
@@ -76,11 +81,23 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Center(
         child: Container(
-          constraints:
-              const BoxConstraints(maxWidth: 400), // Set max width to 400
+          constraints: const BoxConstraints(maxWidth: 400),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
+              AnimatedBuilder(
+                animation: _controller,
+                builder: (context, child) {
+                  return Transform.rotate(
+                    angle: _controller.value * 2.0 * 3.141592653589793,
+                    child: child,
+                  );
+                },
+                child: SvgPicture.asset(
+                  'web/favicon.svg',
+                  height: 80,
+                ),
+              ),
               const Text(
                 "You're logged in as:",
               ),
