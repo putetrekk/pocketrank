@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'pages/home.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+void main() async {
+  await dotenv.load(fileName: ".env");
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final pb = PocketBase('https://pocketrank.api.sjolander.no');
+  final pb = PocketBase("https://${dotenv.env["SERVER_URL"]!}");
 
   MyApp({super.key});
 

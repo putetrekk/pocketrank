@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:pocketbase/pocketbase.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'login.dart';
 import 'match.dart';
@@ -41,7 +42,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
     try {
       final url =
-          Uri.https('pocketrank.api.sjolander.no', 'api/pocketrank/ratings');
+          Uri.https(dotenv.env["SERVER_URL"]!, 'api/pocketrank/ratings');
       final response = await http.get(
         url,
         headers: {'Authorization': pb.authStore.token},
