@@ -40,6 +40,7 @@ dependencies:
   http: any
   logger: ^2.4.0
   flutter_dotenv: ^5.1.0
+  url_launcher: ^6.3.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
