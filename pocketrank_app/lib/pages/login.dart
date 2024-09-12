@@ -65,8 +65,9 @@ class _LoginPageState extends State<LoginPage> {
       ),
       body: Center(
         child: Container(
-          width: MediaQuery.of(context).size.width *
-              0.8, // Set width to 80% of the screen width
+          constraints: const BoxConstraints(
+            maxWidth: 400,
+          ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

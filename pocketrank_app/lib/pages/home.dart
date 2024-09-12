@@ -40,7 +40,8 @@ class _MyHomePageState extends State<MyHomePage> {
       return;
     }
     try {
-      final url = Uri.https('pocketrank.api.sjolander.no', 'api/pocketrank/ratings');
+      final url =
+          Uri.https('pocketrank.api.sjolander.no', 'api/pocketrank/ratings');
       final response = await http.get(
         url,
         headers: {'Authorization': pb.authStore.token},
@@ -81,60 +82,66 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              "You're logged in as:",
-            ),
-            Text(
-              _userName,
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _rankings.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    leading: Text(_rankings[index].leadingEmoji,
-                        style: const TextStyle(fontSize: 20)),
-                    title: Text(_rankings[index].name),
-                    subtitle: Text('Rank: ${_rankings[index].rank}'),
+        child: Container(
+          constraints:
+              const BoxConstraints(maxWidth: 400), // Set max width to 400
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              const Text(
+                "You're logged in as:",
+              ),
+              Text(
+                _userName,
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: _rankings.length,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      leading: Text(_rankings[index].leadingEmoji,
+                          style: const TextStyle(fontSize: 20)),
+                      title: Text(_rankings[index].name),
+                      subtitle: Text('Rank: ${_rankings[index].rank}'),
+                    );
+                  },
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            AddMatchPage(pb: pb, onMatchAdded: _onMatchAdded)),
                   );
                 },
+                style: _userName != "Not logged in"
+                    ? ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white)
+                    : ElevatedButton.styleFrom(),
+                child: const Text('Add Match'),
               ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => AddMatchPage(pb: pb, onMatchAdded: _onMatchAdded)),
-                );
-              },
-              style: _userName != "Not logged in"
-                  ? ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      foregroundColor: Colors.white)
-                  : ElevatedButton.styleFrom(),
-              child: const Text('Add Match'),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => LoginPage(pb: pb)),
-                );
-              },
-              style: _userName == "Not logged in"
-                  ? ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      foregroundColor: Colors.white)
-                  : ElevatedButton.styleFrom(),
-              child: const Text('Go to Login Page'),
-            ),
-            const SizedBox(height: 20),
-          ],
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => LoginPage(pb: pb)),
+                  );
+                },
+                style: _userName == "Not logged in"
+                    ? ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white)
+                    : ElevatedButton.styleFrom(),
+                child: const Text('Go to Login Page'),
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );
