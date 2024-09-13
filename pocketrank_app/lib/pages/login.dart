@@ -68,6 +68,7 @@ class _LoginPageState extends State<LoginPage> {
           constraints: const BoxConstraints(
             maxWidth: 400,
           ),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
