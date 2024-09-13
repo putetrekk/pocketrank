@@ -98,84 +98,87 @@ class _AddMatchPageState extends State<AddMatchPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Column(
-              children: _results
-                  .map((e) => Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: Text(e.playerName),
-                          ),
-                          DropdownButton<int>(
-                            items: List.generate(_results.length, (index) {
-                              return DropdownMenuItem<int>(
-                                value: index + 1,
-                                child: Text((index + 1).toString()),
-                              );
-                            }),
-                            value: e.place,
-                            onChanged: (value) {
-                              setState(() {
-                                _results.remove(e);
-                                _results.insert(
-                                    value! - 1,
-                                    Result(
-                                      playerId: e.playerId,
-                                      match: e.match,
-                                      place: value,
-                                      playerName: e.playerName,
-                                    ));
-                              });
-                            },
-                            hint: const Text('Select a score'),
-                          ),
-                        ],
-                      ))
-                  .toList(),
-            ),
-            const SizedBox(height: 20),
-            if (!_addingPlayer)
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _addingPlayer = true;
-                  });
-                },
-                child: const Text('Add Player'),
-              )
-            else
-              DropdownButton<String>(
-                items: _remainingAvailablePlayers().map(
-                  (e) {
-                    return DropdownMenuItem<String>(
-                      value: e.id,
-                      child: Text(e.data['name']),
-                    );
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: 400),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Column(
+                children: _results
+                    .map((e) => Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: Text(e.playerName),
+                            ),
+                            DropdownButton<int>(
+                              items: List.generate(_results.length, (index) {
+                                return DropdownMenuItem<int>(
+                                  value: index + 1,
+                                  child: Text((index + 1).toString()),
+                                );
+                              }),
+                              value: e.place,
+                              onChanged: (value) {
+                                setState(() {
+                                  _results.remove(e);
+                                  _results.insert(
+                                      value! - 1,
+                                      Result(
+                                        playerId: e.playerId,
+                                        match: e.match,
+                                        place: value,
+                                        playerName: e.playerName,
+                                      ));
+                                });
+                              },
+                              hint: const Text('Select a score'),
+                            ),
+                          ],
+                        ))
+                    .toList(),
+              ),
+              const SizedBox(height: 20),
+              if (!_addingPlayer)
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      _addingPlayer = true;
+                    });
                   },
-                ).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    if (value != null && value.isNotEmpty) {
-                      addPlayer(value);
-                      _addingPlayer = false;
-                    }
-                  });
-                },
-                hint: const Text('Select a player'),
+                  child: const Text('Add Player'),
+                )
+              else
+                DropdownButton<String>(
+                  items: _remainingAvailablePlayers().map(
+                    (e) {
+                      return DropdownMenuItem<String>(
+                        value: e.id,
+                        child: Text(e.data['name']),
+                      );
+                    },
+                  ).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      if (value != null && value.isNotEmpty) {
+                        addPlayer(value);
+                        _addingPlayer = false;
+                      }
+                    });
+                  },
+                  hint: const Text('Select a player'),
+                ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _addMatch,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Save Match'),
               ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _addMatch,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                foregroundColor: Colors.white,
-              ),
-              child: const Text('Save Match'),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
