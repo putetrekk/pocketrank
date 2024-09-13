@@ -94,7 +94,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   );
                 },
                 child: SvgPicture.asset(
-                  'web/favicon.svg',
+                  'web/images/pocketrank.svg',
                   height: 80,
                 ),
               ),
