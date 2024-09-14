@@ -126,6 +126,7 @@ func main() {
 				for i := range players {
 					players[i].Rank += players[i].RankChange
 					players[i].RankChange = 0
+					players[i].RatedAt = match.MatchNumber
 					rating_history = append(rating_history, players[i])
 				}
 			}
