@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
@@ -23,10 +24,11 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   final PocketBase pb;
   var _userName = "Not logged in";
-  var _rankings = <Ranking>[];
+  var _ratings = <PlayerRating>[];
+  var _latestRatings = <PlayerRating>[];
   final logger = Logger();
   late final AnimationController _controller;
-  
+
   @override
   void initState() {
     super.initState();
@@ -55,14 +57,25 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         url,
         headers: {'Authorization': pb.authStore.token},
       );
-      final rankingsList = (jsonDecode(utf8.decode(response.bodyBytes)) as List)
-          .map((e) => Ranking.fromJson(e))
+      final ratings = (jsonDecode(utf8.decode(response.bodyBytes)) as List)
+          .map((e) => PlayerRating.fromJson(e))
           .toList();
-      for (var ranking in rankingsList) {
-        ranking.setLeadingEmoji(rankingsList.indexOf(ranking));
+
+      final latestRatings = ratings
+          .where((element) =>
+              element.date.millisecondsSinceEpoch ==
+              ratings
+                  .where((e) => e.name == element.name)
+                  .map((e) => e.date.millisecondsSinceEpoch)
+                  .reduce(max))
+          .toList();
+
+      for (var ranking in latestRatings) {
+        ranking.setLeadingEmoji(latestRatings.indexOf(ranking));
       }
       setState(() {
-        _rankings = rankingsList;
+        _ratings = ratings;
+        _latestRatings = latestRatings;
       });
     } catch (e) {
       logger.e('Failed to fetch rankings: $e');
@@ -107,13 +120,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               ),
               Expanded(
                 child: ListView.builder(
-                  itemCount: _rankings.length,
+                  itemCount: _latestRatings.length,
                   itemBuilder: (context, index) {
                     return ListTile(
-                      leading: Text(_rankings[index].leadingEmoji,
+                      leading: Text(_latestRatings[index].leadingEmoji,
                           style: const TextStyle(fontSize: 20)),
-                      title: Text(_rankings[index].name),
-                      subtitle: Text('Rank: ${_rankings[index].rank}'),
+                      title: Text(_latestRatings[index].name),
+                      subtitle: Text('Rank: ${_latestRatings[index].rank}'),
                     );
                   },
                 ),
@@ -185,17 +198,19 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   }
 }
 
-class Ranking {
-  Ranking({required this.name, required this.rank});
+class PlayerRating {
+  PlayerRating({required this.name, required this.date, required this.rank});
 
   final String name;
+  final DateTime date;
   final int rank;
   String leadingEmoji = '\u{1F3C5}';
 
-  factory Ranking.fromJson(Map<String, dynamic> json) {
-    return Ranking(
+  factory PlayerRating.fromJson(Map<String, dynamic> json) {
+    return PlayerRating(
       name: json['name'] as String,
-      rank: json['rank'] as int,
+      date: DateTime.fromMillisecondsSinceEpoch(json['date'] as int),
+      rank: json['rating'] as int,
     );
   }
 

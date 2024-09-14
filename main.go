@@ -4,7 +4,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"sort"
 	"strings"
 
 	"math"
@@ -41,8 +40,9 @@ type Match struct {
 type Player struct {
 	Id         string `json:"id"`
 	Name       string `json:"name"`
-	Rank       int    `json:"rank"`
-	RankChange int    `json:"rank_change"`
+	RatedAt    int    `json:"rated_at"`
+	Rank       int    `json:"rating"`
+	RankChange int    `json:"rating_change"`
 }
 
 func main() {
@@ -111,6 +111,7 @@ func main() {
 			}
 
 			players := make([]Player, 0, len(matchups))
+			rating_history := make([]Player, 0, len(matchups))
 
 			for _, match := range matches {
 				log.Println("Match Number: ", match.MatchNumber)
@@ -125,14 +126,11 @@ func main() {
 				for i := range players {
 					players[i].Rank += players[i].RankChange
 					players[i].RankChange = 0
+					rating_history = append(rating_history, players[i])
 				}
 			}
 
-			sort.Slice(players, func(i, j int) bool {
-				return players[i].Rank > players[j].Rank
-			})
-
-			return c.JSON(http.StatusOK, players)
+			return c.JSON(http.StatusOK, rating_history)
 		}, apis.RequireAdminOrRecordAuth())
 		return nil
 	})
