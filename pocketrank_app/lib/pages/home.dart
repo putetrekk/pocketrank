@@ -136,14 +136,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                               borderData: FlBorderData(show: false),
                               lineBarsData: [
                                 LineChartBarData(
-                                  spots: _ratings
-                                      .where((element) =>
-                                          element.name ==
-                                          _latestRatings[index].name)
-                                      .map((e) => FlSpot(
-                                          _ratings.indexOf(e).toDouble(),
-                                          e.rank.toDouble()))
-                                      .toList(),
+                                  spots: getPlayerRatingHistory(_latestRatings[index].name),
                                   isCurved: true,
                                   barWidth: 4,
                                   isStrokeCapRound: true,
@@ -214,6 +207,19 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         ),
       ),
     );
+  }
+
+  List<FlSpot> getPlayerRatingHistory(String playerName) {
+    final playerRatingEntries = _ratings
+        .where((element) => element.name == playerName).toList();
+
+    final indexedPlayerRatings = playerRatingEntries
+        .asMap()
+        .entries
+        .map((e) => FlSpot(e.key.toDouble(), e.value.rank.toDouble()))
+        .toList();
+
+    return indexedPlayerRatings;
   }
 
   void _redirectToDiscord() async {
