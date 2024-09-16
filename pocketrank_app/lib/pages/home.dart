@@ -174,14 +174,14 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   child: const Text('Reset Password'),
                 ),
               const SizedBox(height: 20),*/
-              if (_userName == "Not logged in")
-                ElevatedButton(
-                  onPressed: () {
-                    _redirectToDiscord();
-                  },
-                  child: const Text('Login with Discord'),
-                ),
-              const SizedBox(height: 20),
+              // if (_userName == "Not logged in")
+              //   ElevatedButton(
+              //     onPressed: () {
+              //       _redirectToDiscord();
+              //     },
+              //     child: const Text('Login with Discord'),
+              //   ),
+              // const SizedBox(height: 20),
             ],
           ),
         ),
