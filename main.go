@@ -130,6 +130,16 @@ func main() {
 					rating_history = append(rating_history, players[i])
 				}
 			}
+			// add a record with initial rating for all players
+			for _, player := range players {
+				rating_history = append([]Player{{
+					Id:         player.Id,
+					Name:       player.Name,
+					RatedAt:    0,
+					Rank:       initial,
+					RankChange: 0,
+				}}, rating_history...)
+			}
 
 			return c.JSON(http.StatusOK, rating_history)
 		}, apis.RequireAdminOrRecordAuth())
