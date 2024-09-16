@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
@@ -121,11 +122,37 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   itemCount: _latestRatings.length,
                   itemBuilder: (context, index) {
                     return ListTile(
-                      leading: Text(_latestRatings[index].leadingEmoji,
-                          style: const TextStyle(fontSize: 20)),
-                      title: Text(_latestRatings[index].name),
-                      subtitle: Text('Rank: ${_latestRatings[index].rank}'),
-                    );
+                        leading: Text(_latestRatings[index].leadingEmoji,
+                            style: const TextStyle(fontSize: 20)),
+                        title: Text(_latestRatings[index].name),
+                        subtitle: Text('Rank: ${_latestRatings[index].rank}'),
+                        trailing: SizedBox(
+                          width: 200,
+                          height: 50,
+                          child: LineChart(
+                            LineChartData(
+                              gridData: const FlGridData(show: false),
+                              titlesData: const FlTitlesData(show: false),
+                              borderData: FlBorderData(show: false),
+                              lineBarsData: [
+                                LineChartBarData(
+                                  spots: _ratings
+                                      .where((element) =>
+                                          element.name ==
+                                          _latestRatings[index].name)
+                                      .map((e) => FlSpot(
+                                          _ratings.indexOf(e).toDouble(),
+                                          e.rank.toDouble()))
+                                      .toList(),
+                                  isCurved: true,
+                                  barWidth: 4,
+                                  isStrokeCapRound: true,
+                                  dotData: const FlDotData(show: false),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ));
                   },
                 ),
               ),
