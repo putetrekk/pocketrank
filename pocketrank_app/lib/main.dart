@@ -9,7 +9,9 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  final pb = PocketBase("https://${dotenv.env["SERVER_URL"]!}");
+  final pb = dotenv.env['TLS_ENABLED'] == 'true'
+      ? PocketBase("https://${dotenv.env["SERVER_URL"]!}")
+      : PocketBase("http://${dotenv.env["SERVER_URL"]!}");
 
   MyApp({super.key});
 

@@ -50,36 +50,34 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     if (_userName == "Not logged in") {
       return;
     }
-    try {
-      final url =
-          Uri.https(dotenv.env["SERVER_URL"]!, 'api/pocketrank/ratings');
-      final response = await http.get(
-        url,
-        headers: {'Authorization': pb.authStore.token},
-      );
-      final ratings = (jsonDecode(utf8.decode(response.bodyBytes)) as List)
-          .map((e) => PlayerRating.fromJson(e))
-          .toList();
+    final url = dotenv.env["TLS_ENABLED"] == 'true'
+        ? Uri.https(dotenv.env["SERVER_URL"]!, 'api/pocketrank/ratings')
+        : Uri.http(dotenv.env["SERVER_URL"]!, 'api/pocketrank/ratings');
+    final response = await http.get(
+      url,
+      headers: {'Authorization': pb.authStore.token},
+    );
+    final ratings = (jsonDecode(utf8.decode(response.bodyBytes)) as List)
+        .map((e) => PlayerRating.fromJson(e))
+        .toList();
 
-      final latestRatings = ratings
-          .where((element) =>
-              element.date.millisecondsSinceEpoch ==
-              ratings
-                  .where((e) => e.name == element.name)
-                  .map((e) => e.date.millisecondsSinceEpoch)
-                  .reduce(max))
-          .toList();
+    final latestRatings = ratings
+        .where((element) =>
+            element.date.millisecondsSinceEpoch ==
+            ratings
+                .where((e) => e.name == element.name)
+                .map((e) => e.date.millisecondsSinceEpoch)
+                .reduce(max))
+        .toList()
+      ..sort((a, b) => b.rank.compareTo(a.rank));
 
-      for (var ranking in latestRatings) {
-        ranking.setLeadingEmoji(latestRatings.indexOf(ranking));
-      }
-      setState(() {
-        _ratings = ratings;
-        _latestRatings = latestRatings;
-      });
-    } catch (e) {
-      logger.e('Failed to fetch rankings: $e');
+    for (var ranking in latestRatings) {
+      ranking.setLeadingEmoji(latestRatings.indexOf(ranking));
     }
+    setState(() {
+      _ratings = ratings;
+      _latestRatings = latestRatings;
+    });
   }
 
   void _onMatchAdded() {
@@ -209,7 +207,7 @@ class PlayerRating {
   factory PlayerRating.fromJson(Map<String, dynamic> json) {
     return PlayerRating(
       name: json['name'] as String,
-      date: DateTime.fromMillisecondsSinceEpoch(json['date'] as int),
+      date: DateTime.fromMillisecondsSinceEpoch(json['rated_at'] as int),
       rank: json['rating'] as int,
     );
   }

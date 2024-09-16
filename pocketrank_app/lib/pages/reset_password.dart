@@ -11,7 +11,9 @@ class ResetPasswordPage extends StatefulWidget {
 
 class ResetPasswordPageState extends State<ResetPasswordPage> {
   final _emailController = TextEditingController();
-  final _pb = PocketBase("https://${dotenv.env["SERVER_URL"]!}");
+  final _pb = dotenv.env['TLS_ENABLED'] == 'true'
+      ? PocketBase("https://${dotenv.env["SERVER_URL"]!}")
+      : PocketBase("http://${dotenv.env["SERVER_URL"]!}");
 
   Future<void> _resetPassword() async {
     final email = _emailController.text;
