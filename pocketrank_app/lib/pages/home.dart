@@ -127,7 +127,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                         title: Text(_latestRatings[index].name),
                         subtitle: Text('Rank: ${_latestRatings[index].rank}'),
                         trailing: SizedBox(
-                          width: 200,
+                          width: 150,
                           height: 50,
                           child: LineChart(
                             LineChartData(
